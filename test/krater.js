@@ -1,6 +1,6 @@
 import assert from 'assert'
 import fetch from 'node-fetch'
-import { default as Router } from '../src'
+import { default as Router } from '../src/krater'
 import methods from '../src/methods'
 import Koa from 'koa'
 
