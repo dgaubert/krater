@@ -4,6 +4,20 @@ import methods from './methods'
 import safeDecodeURIComponent from './safe-decode-uri-component'
 
 export default class Krater {
+  constructor () {
+    this.hooks = []
+  }
+
+  hook (hook) {
+    if (typeof hook !== 'function') {
+      throw new TypeError('Hook must be a function')
+    }
+
+    this.hooks.push(hook)
+
+    return this
+  }
+
   path (path) {
     this.regexp = pathToRegexp(path)
     return this
@@ -41,13 +55,20 @@ export default class Krater {
         ctx.assert(typeof handler === 'function', 405)
         ctx.params = this.params(ctx.path)
 
-        let middleware = handler.call(this)
+        // bind handler context to use injected dependencies
+        let middlewares = handler.call(this)
 
-        if (Array.isArray(middleware)) {
-          middleware = compose(middleware)
+        if (!Array.isArray(middlewares)) {
+          middlewares = [ middlewares ]
         }
 
-        await middleware.call(this, ctx, next)
+        if (this.hooks.length) {
+          middlewares.unshift(...this.hooks)
+        }
+
+        middlewares = compose(middlewares)
+
+        await middlewares.call(this, ctx, next)
       } else {
         await next()
       }
