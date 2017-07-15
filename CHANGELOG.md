@@ -1,5 +1,9 @@
 # Krater ChangeLog
 
+## v0.3.0 (2017-07-15)
+
+ - Return path params as object
+
 ## v0.2.0 (2017-07-15)
 
  - Do not support CONNECT method
