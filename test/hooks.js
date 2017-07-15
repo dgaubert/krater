@@ -103,4 +103,26 @@ describe('hooks', function () {
     assert.equal(res.headers.get('content-type'), 'text/plain; charset=utf-8')
     assert.equal(body, 'Bad Request')
   })
+
+  it('should 200 with array of hooks', async function () {
+    this.user.hook([
+      async (ctx, next) => {
+        ctx.body = 'hello '
+        await next()
+      },
+      async (ctx, next) => {
+        await next()
+        ctx.body += '!!!'
+      }
+    ])
+    this.user.regist(this.app)
+
+    const res = await fetch(`http://localhost:${this.port}/${USER}`)
+    const body = await res.text()
+
+    assert.ok(res.ok, res.statusText)
+    assert.equal(res.status, 200)
+    assert.equal(res.headers.get('content-type'), 'text/plain; charset=utf-8')
+    assert.equal(body, `hello ${USER}!!!`)
+  })
 })

@@ -8,12 +8,12 @@ export default class Krater {
     this.hooks = []
   }
 
-  hook (hook) {
-    if (typeof hook !== 'function') {
-      throw new TypeError('Hook must be a function')
+  hook (hooks) {
+    if (!Array.isArray(hooks)) {
+      hooks = [ hooks ]
     }
 
-    this.hooks.push(hook)
+    this.hooks.push(...hooks)
 
     return this
   }
