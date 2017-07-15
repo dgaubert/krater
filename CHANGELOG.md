@@ -1,5 +1,9 @@
 # Krater ChangeLog
 
+## v0.4.0 (2017-07-15)
+
+ - Support middleware hooks
+
 ## v0.3.0 (2017-07-15)
 
  - Return path params as object
