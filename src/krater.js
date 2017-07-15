@@ -1,6 +1,7 @@
 import pathToRegexp from 'path-to-regexp'
 import compose from 'koa-compose'
 import methods from './methods'
+import safeDecodeURIComponent from './safe-decode-uri-component'
 
 export default class Krater {
   path (path) {
@@ -12,9 +13,14 @@ export default class Krater {
     return this.regexp.test(path)
   }
 
-  params (ctx) {
-    const [ , ...params ] = this.regexp.exec(ctx.path)
-    return params
+  params (path) {
+    const captures = this.regexp.exec(path).slice(1)
+    const parameters = this.regexp.keys.reduce((params, placeholder, index) => {
+      params[placeholder.name] = safeDecodeURIComponent(captures[index])
+      return params
+    }, {})
+
+    return parameters
   }
 
   regist (app) {
@@ -33,7 +39,7 @@ export default class Krater {
         const handler = this[methods[ctx.method]]
 
         ctx.assert(typeof handler === 'function', 405)
-        ctx.params = this.params(ctx)
+        ctx.params = this.params(ctx.path)
 
         let middleware = handler.call(this)
 

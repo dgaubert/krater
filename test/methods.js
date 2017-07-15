@@ -12,7 +12,7 @@ Object.keys(methods).forEach(function (method) {
   class User extends Router {
     [ controllerMethod ] () {
       return ctx => {
-        ctx.body = ctx.params[0]
+        ctx.body = ctx.params.user
       }
     }
   }
