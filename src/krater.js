@@ -6,6 +6,7 @@ import safeDecodeURIComponent from './safe-decode-uri-component'
 export default class Krater {
   constructor () {
     this.hooks = []
+    this.handlers = {}
   }
 
   hook (hooks) {
@@ -42,33 +43,47 @@ export default class Krater {
       throw new Error('Missing path to route requests')
     }
 
+    Object.keys(methods).forEach(key => {
+      const method = methods[key]
+      const handler = this[method]
+
+      if (typeof handler === 'function') {
+        this.mount(method, handler)
+      }
+    })
+
     app.use(this.route())
 
     return this
   }
 
+  mount (method, handler) {
+    // bind handler context to use injected dependencies
+    let middlewares = handler.call(this)
+
+    if (!Array.isArray(middlewares)) {
+      middlewares = [ middlewares ]
+    }
+
+    if (this.hooks.length) {
+      middlewares.unshift(...this.hooks)
+    }
+
+    middlewares = compose(middlewares)
+
+    this.handlers[method] = middlewares
+  }
+
   route () {
     return async (ctx, next) => {
       if (this.match(ctx.path)) {
-        const handler = this[methods[ctx.method]]
+        const method = methods[ctx.method]
+        const handler = this.handlers[method]
 
         ctx.assert(typeof handler === 'function', 405)
         ctx.params = this.params(ctx.path)
 
-        // bind handler context to use injected dependencies
-        let middlewares = handler.call(this)
-
-        if (!Array.isArray(middlewares)) {
-          middlewares = [ middlewares ]
-        }
-
-        if (this.hooks.length) {
-          middlewares.unshift(...this.hooks)
-        }
-
-        middlewares = compose(middlewares)
-
-        await middlewares.call(this, ctx, next)
+        await handler.call(this, ctx, next)
       } else {
         await next()
       }
