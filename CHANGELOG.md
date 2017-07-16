@@ -1,5 +1,9 @@
 # Krater ChangeLog
 
+## v0.5.0 (2017-07-16)
+
+ - Build middleware stack at regist time instead of request/response time
+
 ## v0.4.0 (2017-07-15)
 
  - Support middleware hooks
@@ -11,7 +15,7 @@
 ## v0.2.0 (2017-07-15)
 
  - Do not support CONNECT method
- - Fix test to cover all http methods
+ - Fix tests to cover all http methods
 
 ## v0.1.0 (2017-07-09)
 
